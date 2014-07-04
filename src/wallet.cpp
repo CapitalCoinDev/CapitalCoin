@@ -966,32 +966,6 @@ int64 CWallet::GetBalance(uint nSettings) {
     return(nTotal);
 }
 
-/* Calculates minted rewards, either immature or complete, for either PoW or PoS or both:
-* bit 0 = PoW rewards;
-* bit 1 = PoS rewards;
-* bit 2 = immature only;
-* bit 3 = PoS debit only */
-int64 CWallet::GetMinted(uint nSettings) {
-    int64 nTotal = 0;
-    LOCK(cs_wallet);
-    for(map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-        const CWalletTx* pcoin = &(*it).second;
-        if(((nSettings & 0x1) && pcoin->IsCoinBase()) ||
-          ((nSettings & 0x2) && pcoin->IsCoinStake())) {
-            int nDepth = pcoin->GetDepthInMainChain();
-            if(nDepth > 0) {
-                if(((nSettings & 0x4) && (nDepth < nBaseMaturity)) || !(nSettings & 0x4)) {
-                    /* PoW base transactions have zero debit anyway */
-                    if(nSettings & 0x8)
-                      nTotal += CWallet::GetDebit(*pcoin);
-                    else
-                      nTotal += CWallet::GetCredit(*pcoin) - CWallet::GetDebit(*pcoin);
-                }
-            }
-        }
-    }
-    return(nTotal);
-}
 
 int64 CWallet::GetUnconfirmedBalance() const
 {
