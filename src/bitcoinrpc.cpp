@@ -268,8 +268,6 @@ static const CRPCCommand vRPCCommands[] =
     { "makekeypair",            &makekeypair,            false,  true},
     { "sendalert",              &sendalert,              false,  false},
     { "getnetworkhashps",       &getnetworkhashps,       true,   false },
-    { "getstakegen",            &getstakegen,            true,   false },
-    { "setstakegen",            &setstakegen,            true,   false },
 };
 
 CRPCTable::CRPCTable()
@@ -1187,7 +1185,6 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "signrawtransaction"     && n > 1) ConvertTo<Array>(params[1], true);
     if (strMethod == "signrawtransaction"     && n > 2) ConvertTo<Array>(params[2], true);
     if (strMethod == "getnetworkhashps"       && n > 0) ConvertTo<boost::int64_t>(params[0]);
-    if (strMethod == "setstakegen"            && n > 0) ConvertTo<bool>(params[0]);
 
     return params;
 }
