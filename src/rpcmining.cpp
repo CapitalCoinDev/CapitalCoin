@@ -6,7 +6,6 @@
 #include "main.h"
 #include "db.h"
 #include "init.h"
-#include "miner.h"
 #include "bitcoinrpc.h"
 
 using namespace json_spirit;
@@ -68,33 +67,28 @@ Value getmininginfo(const Array& params, bool fHelp)
         throw runtime_error(
             "getmininginfo\n"
             "Returns an object containing mining-related information.");
-
+    
     /* Caches the results for 10 minutes */
     if((GetTime() - 600) > nLastWalletStakeTime) {
         pwalletMain->GetStakeWeight(*pwalletMain, nMinWeightInputs, nAvgWeightInputs, nMaxWeightInputs, nTotalStakeWeight);
         nLastWalletStakeTime = GetTime();
     }
-
+    
+    
+    
+    
     Object obj;
     obj.push_back(Pair("blocks",        (int)nBestHeight));
     obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
     obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
     obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
-
-
-
     obj.push_back(Pair("errors",        GetWarnings("statusbar")));
-
     obj.push_back(Pair("generate",      GetBoolArg("-gen")));
     obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
-
-
-
     obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
     obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
     obj.push_back(Pair("testnet",       fTestNet));
     return obj;
-
 }
 
 Value getworkex(const Array& params, bool fHelp)
@@ -345,7 +339,7 @@ Value getwork(const Array& params, bool fHelp)
 
 Value getblocktemplate(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() != 1)
+    if (fHelp || params.size() > 1)
         throw runtime_error(
             "getblocktemplate [params]\n"
             "Returns data needed to construct a block to work on:\n"
@@ -428,7 +422,6 @@ Value getblocktemplate(const Array& params, bool fHelp)
     Array transactions;
     map<uint256, int64_t> setTxIndex;
     int i = 0;
-
     CTxDB txdb("r");
     BOOST_FOREACH (CTransaction& tx, pblock->vtx)
     {
@@ -446,21 +439,12 @@ Value getblocktemplate(const Array& params, bool fHelp)
 
         entry.push_back(Pair("hash", txHash.GetHex()));
 
-
-
         MapPrevTx mapInputs;
         map<uint256, CTxIndex> mapUnused;
         bool fInvalid = false;
         if (tx.FetchInputs(txdb, mapUnused, false, false, mapInputs, fInvalid))
         {
-
-
-
             entry.push_back(Pair("fee", (int64_t)(tx.GetValueIn(mapInputs) - tx.GetValueOut())));
-
-
-
-
 
             Array deps;
             BOOST_FOREACH (MapPrevTx::value_type& inp, mapInputs)
@@ -474,7 +458,6 @@ Value getblocktemplate(const Array& params, bool fHelp)
             nSigOps += tx.GetP2SHSigOpCount(mapInputs);
             entry.push_back(Pair("sigops", nSigOps));
         }
-
 
         transactions.push_back(entry);
     }
@@ -564,25 +547,4 @@ Value getnetworkhashps(const Array& params, bool fHelp) {
     double timePerBlock = timeDiff / lookup;
 
     return (boost::int64_t)(((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
-}
-
-Value getstakegen(const Array& params, bool fHelp) {
-
-    if(fHelp || params.size() != 0) throw runtime_error(
-      "getstakegen\n"
-      "Returns true or false.");
-
-    return fStakeGen;
-}
-
-Value setstakegen(const Array& params, bool fHelp) {
-
-    if(fHelp || params.size() != 1) throw runtime_error(
-      "setstakegen <generate>\n"
-      "<generate> is true or false to turn generation on or off.");
-
-    /* The flag triggers the stake miner */
-    if(params.size() > 0) fStakeGen = params[0].get_bool();
-
-    return Value::null;
 }
