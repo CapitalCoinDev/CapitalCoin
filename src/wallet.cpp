@@ -952,25 +952,18 @@ void CWallet::ResendWalletTransactions()
 * bit 0 = available balance;
 * bit 1 = unconfirmed balance
 * NOTE: this code makes use of TX_MATURITY rather than IsConfirmed() */
-int64 CWallet::GetBalance(uint nSettings) const
-{
+int64 CWallet::GetBalance(uint nSettings) {
     int64 nTotal = 0;
-    {
-        LOCK(cs_wallet);
-        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
-        {
-            const CWalletTx* pcoin = &(*it).second;
-            int nDepth = pcoin->GetDepthInMainChain();
-            if (pcoin->IsFinal() && pcoin->IsConfirmed())
-                nTotal += pcoin->GetAvailableCredit();
-            if((nSettings & 0x1) && (nDepth >= TX_MATURITY))
-                nTotal += pcoin->GetAvailableCredit();
-            if((nSettings & 0x2) && (nDepth < TX_MATURITY) && (nDepth > 0))
-                nTotal += pcoin->GetAvailableCredit();
-        }
+    LOCK(cs_wallet);
+    for(map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
+        const CWalletTx* pcoin = &(*it).second;
+        int nDepth = pcoin->GetDepthInMainChain();
+        if((nSettings & 0x1) && (nDepth >= TX_MATURITY))
+          nTotal += pcoin->GetAvailableCredit();
+        if((nSettings & 0x2) && (nDepth < TX_MATURITY) && (nDepth > 0))
+          nTotal += pcoin->GetAvailableCredit();
     }
-
-    return nTotal;
+    return(nTotal);
 }
 
 /* Calculates minted rewards, either immature or complete, for either PoW or PoS or both:
