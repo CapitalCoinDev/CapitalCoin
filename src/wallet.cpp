@@ -948,24 +948,21 @@ void CWallet::ResendWalletTransactions()
 //
 
 
-/* Calculates either available or unconfirmed balance or both:
-* bit 0 = available balance;
-* bit 1 = unconfirmed balance
-* NOTE: this code makes use of TX_MATURITY rather than IsConfirmed() */
-int64 CWallet::GetBalance(uint nSettings) {
+int64 CWallet::GetBalance() const
+{
     int64 nTotal = 0;
-    LOCK(cs_wallet);
-    for(map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-        const CWalletTx* pcoin = &(*it).second;
-        int nDepth = pcoin->GetDepthInMainChain();
-        if((nSettings & 0x1) && (nDepth >= TX_MATURITY))
-          nTotal += pcoin->GetAvailableCredit();
-        if((nSettings & 0x2) && (nDepth < TX_MATURITY) && (nDepth > 0))
-          nTotal += pcoin->GetAvailableCredit();
+    {
+        LOCK(cs_wallet);
+        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+        {
+            const CWalletTx* pcoin = &(*it).second;
+            if (pcoin->IsFinal() && pcoin->IsConfirmed())
+                nTotal += pcoin->GetAvailableCredit();
+        }
     }
-    return(nTotal);
-}
 
+    return nTotal;
+}
 
 int64 CWallet::GetUnconfirmedBalance() const
 {
