@@ -75,7 +75,6 @@ Value getmininginfo(const Array& params, bool fHelp)
 
     obj.push_back(Pair("powdifficulty", (float)GetDifficulty()));
     obj.push_back(Pair("posdifficulty", (float)GetDifficulty(GetLastBlockIndex(pindexBest, true))));
-    obj.push_back(Pair("posreward", (float)(GetProofOfStakeReward(GetLastBlockIndex(pindexBest, true)->nHeight, (int64)NULL))/COIN));
     
     obj.push_back(Pair("errors",        GetWarnings("statusbar")));
     obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
