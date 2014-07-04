@@ -84,10 +84,7 @@ Value getmininginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
     
     obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
-    obj.push_back(Pair("stakeweight", (uint64_t)nTotalStakeWeight));
-    obj.push_back(Pair("minweightinputs", (uint64_t)nMinWeightInputs));
-    obj.push_back(Pair("avgweightinputs", (uint64_t)nAvgWeightInputs));
-    obj.push_back(Pair("maxweightinputs", (uint64_t)nMaxWeightInputs));
+
     
     obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
     obj.push_back(Pair("testnet",       fTestNet));
