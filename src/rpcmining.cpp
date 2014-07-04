@@ -67,28 +67,26 @@ Value getmininginfo(const Array& params, bool fHelp)
         throw runtime_error(
             "getmininginfo\n"
             "Returns an object containing mining-related information.");
-    
-    /* Caches the results for 10 minutes */
-    if((GetTime() - 600) > nLastWalletStakeTime) {
-        pwalletMain->GetStakeWeight(*pwalletMain, nMinWeightInputs, nAvgWeightInputs, nMaxWeightInputs, nTotalStakeWeight);
-        nLastWalletStakeTime = GetTime();
-    }
-    
-    
-    
-    
+
+
     Object obj;
-    obj.push_back(Pair("blocks",        (int)nBestHeight));
+    obj.push_back(Pair("blocks", (int)nBestHeight));
     obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
     obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
-    obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
-    obj.push_back(Pair("errors",        GetWarnings("statusbar")));
-    obj.push_back(Pair("generate",      GetBoolArg("-gen")));
-    obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
-    obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
-    obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
-    obj.push_back(Pair("testnet",       fTestNet));
+    obj.push_back(Pair("powdifficulty", (float)GetDifficulty()));
+    obj.push_back(Pair("posdifficulty", (float)GetDifficulty(GetLastBlockIndex(pindexBest, true))));
+    obj.push_back(Pair("powreward", (float)(GetProofOfWorkReward(GetLastBlockIndex(pindexBest, false)->nHeight, (int64)NULL))/COIN));
+    obj.push_back(Pair("posreward", (float)(GetProofOfStakeReward(GetLastBlockIndex(pindexBest, true)->nHeight, (int64)NULL))/COIN));
+    obj.push_back(Pair("errors", GetWarnings("statusbar")));
+    obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
+    obj.push_back(Pair("stakeweight", (uint64_t)nTotalStakeWeight));
+    obj.push_back(Pair("minweightinputs", (uint64_t)nMinWeightInputs));
+    obj.push_back(Pair("avgweightinputs", (uint64_t)nAvgWeightInputs));
+    obj.push_back(Pair("maxweightinputs", (uint64_t)nMaxWeightInputs));
+    obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
+    obj.push_back(Pair("testnet", fTestNet));
     return obj;
+
 }
 
 Value getworkex(const Array& params, bool fHelp)
